@@ -1,8 +1,9 @@
-import React from 'react'
 
 const page = () => {
   return (
-    <div>Welcome to Nextjs16!</div>
+    <section>
+      <h1 className="text-center">The Hub for Every Dev <br /> Event you Can&apos;t Miss</h1>
+    </section>
   )
 }
 
