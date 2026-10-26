@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import LightRays from '@/components/LightRays';
 import Navbar from "@/components/Navbar";
+import { Providers } from "./providers";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -60,7 +61,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 />
 </div>
         <main>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </main>
         </body>
     </html>
