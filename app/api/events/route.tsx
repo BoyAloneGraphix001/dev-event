@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
         try {
             event = Object.fromEntries(formData.entries());
         } catch (e) {
+            console.log(e);
             return NextResponse.json({ messgae: 'Invalid JSON data format' }, { status: 400 })
         }
 
