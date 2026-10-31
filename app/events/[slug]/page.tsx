@@ -24,9 +24,24 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
     const { event } = await request.json() as EventApiResponse;
     if (!event) return notFound();
 
+    const { description, image, overview, date, time, location, mode, agenda, audience, tags } = event;
+    if (!description) return notFound();
+
   return (
     <section id="event">
-        <h1>Event Details: <br /> {slug}</h1>
+        <div className="header">
+            <h1>Event Description</h1>
+            <p className="mt-2">{description}</p>
+        </div>
+
+        <div className="details">
+            {/* Left Side -Event Content  */}
+            
+            {/* Right Side -Booking Form  */}
+            <aside className="booking">
+                <p className="text-lg font-semibold">Book Event</p>
+            </aside>
+        </div>
     </section>
   )
 }
