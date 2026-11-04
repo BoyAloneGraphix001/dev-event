@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { IEvent } from "@/database";
 import Image from "next/image";
+import BookEvent from "@/components/BookEvent";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -56,6 +57,8 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = event;
     if (!description) return notFound();
 
+    const bookings = 10;
+
   return (
     <section id="event">
         <div className="header">
@@ -93,7 +96,19 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
             </div>
             {/* Right Side -Booking Form  */}
             <aside className="booking">
-                <p className="text-lg font-semibold">Book Event</p>
+                <div className="signup-card">
+                    <h2>Book your spot</h2>
+                    {bookings > 0 ? (
+                        <p className="text-sm">
+                            Join {bookings} people who have already book their spot for this event!
+                        </p>
+                    ): (
+                        <p className="text-sm">
+                            Be their first to book your spot!
+                        </p>
+                    )}
+                    <BookEvent />
+                </div>
             </aside>
         </div>
     </section>
