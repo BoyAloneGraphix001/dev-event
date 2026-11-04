@@ -9,22 +9,34 @@ await connectToDatabase();
 
     const contentType = req.headers.get('content-type') ?? '';
     let event: Record<string, unknown>;
-    let file: File | null = null;
+    let file: Blob | null = null;
 
     if (contentType.includes('application/json')) {
       event = await req.json();
     } else if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      event = Object.fromEntries(formData.entries());
-      file = formData.get('image') as File | null;
+      event = Object.fromEntries(
+        [...formData.entries()].filter(([key]) => key !== 'image')
+      );
+      const image = formData.get('image');
+      if (typeof image === 'object' && image !== null && typeof image !== 'string') {
+        file = image;
+      }
 
     } else {
       throw new Error('Content-Type must be application/json or multipart/form-data.');
+
     }
+
+    const tags = typeof event.tags === 'string' ? JSON.parse(event.tags) : event.tags;
+    const agenda = typeof event.agenda === 'string' ? JSON.parse(event.agenda) : event.agenda;
 
     if(!file) return NextResponse.json({ message: 'Image file is required' }, { status: 400 })
 
-    const arrayBuffer = await file.arrayBuffer();
+    const arrayBuffer =
+      typeof file.arrayBuffer === 'function'
+        ? await file.arrayBuffer()
+        : await new Response(file).arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     const uploadResult = await new Promise((resolve, reject) => {
@@ -36,7 +48,7 @@ await connectToDatabase();
 
     event.image = (uploadResult as { secure_url: string }).secure_url;
 
-    const createdEvent = await Event.create(event);
+    const createdEvent = await Event.create({...event, tags:tags, agenda: [agenda]});
 
     return NextResponse.json(
         {
@@ -70,4 +82,3 @@ export async function GET() {
         return NextResponse.json({ message: 'Event fetching failed', error: e }, { status: 500 });
     }
 };
-
