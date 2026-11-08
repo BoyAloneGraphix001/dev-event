@@ -4,8 +4,9 @@ import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
+import { getBaseUrl } from "@/lib/base-url";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = getBaseUrl();
 
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => {
     return (

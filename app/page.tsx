@@ -1,21 +1,23 @@
 import ExploreBtn from '../components/ExploreBtn';
 import EventCard from '@/components/EventCard';
-import { IEvent } from '@/database';
 import { cacheLife } from 'next/cache';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { Event } from '@/database';
+import { connectToDatabase } from '@/lib/mongodb';
 
 const page = async () => {
   'use cache';
   cacheLife('hours')
-  if (!BASE_URL) throw new Error('NEXT_PUBLIC_BASE_URL is not configured');
 
-  const response = await fetch(`${BASE_URL}/api/events`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch events: ${response.status} ${response.statusText}`);
-  }
-
-  const { events } = await response.json();
+  await connectToDatabase();
+  const eventDocuments = await Event.find().sort({ createdAt: -1 }).lean();
+  const events = eventDocuments.map((event) => ({
+    title: String(event.title),
+    image: String(event.image),
+    slug: String(event.slug),
+    location: String(event.location),
+    date: String(event.date),
+    time: String(event.time),
+  }));
 
   return (
     <section>
@@ -27,7 +29,7 @@ const page = async () => {
         <h3>Featured Events</h3>
 
         <ul className='events'>
-          {events && events.length > 0 && events.map((event: IEvent) => (
+          {events.length > 0 && events.map((event) => (
             <li key={event.title}>
               <EventCard {...event}/>
             </li>
