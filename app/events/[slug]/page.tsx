@@ -73,7 +73,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
 
     const bookings = 10;
 
-    const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
+    const similarEvents = await getSimilarEventsBySlug(slug);
 
   return (
     <section id="event">
@@ -131,7 +131,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
         <div className="flex w-full flex-col gap-4 pt-20">
             <h2>Similar Events</h2>
             <div className="events">
-                {similarEvents.length > 0 && similarEvents.map((similarEvent: IEvent) => (
+                {similarEvents.length > 0 && similarEvents.map((similarEvent) => (
                     <EventCard {...similarEvent} key={similarEvent.slug} />
                 ))}
             </div>
