@@ -16,7 +16,6 @@ const BookingSchema = new Schema<IBooking>(
       type: Schema.Types.ObjectId,
       ref: 'Event',
       required: [true, 'Event ID is required.'],
-      index: true,
     },
     email: {
       type: String,

@@ -41,7 +41,7 @@ const nonEmptyStringArray = {
 const EventSchema = new Schema<IEvent>(
   {
     title: requiredString,
-    slug: { ...requiredString, unique: true },
+    slug: requiredString,
     description: requiredString,
     overview: requiredString,
     image: requiredString,

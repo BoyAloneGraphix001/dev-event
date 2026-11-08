@@ -4,9 +4,9 @@ import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
-import { getBaseUrl } from "@/lib/base-url";
-
-const BASE_URL = getBaseUrl();
+import { cacheLife } from "next/cache";
+import { Event } from "@/database/event.model";
+import { connectToDatabase } from "@/lib/mongodb";
 
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => {
     return (
@@ -48,25 +48,39 @@ const normalizeStringArray = (values: string[]): string[] =>
         }
     });
 
-interface EventApiResponse {
-    event?: IEvent;
+export async function generateStaticParams() {
+    await connectToDatabase();
+    const events = await Event.find().select('slug').lean();
+    return events.map((event) => ({ slug: String(event.slug) }));
 }
 
 const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    'use cache';
+    cacheLife('hours');
+
     const { slug } = await params;
+    await connectToDatabase();
+    const eventDocument = await Event.findOne({ slug }).lean();
+    if (!eventDocument) return notFound();
 
-    if (!BASE_URL) {
-        throw new Error('NEXT_PUBLIC_BASE_URL is not configured');
-    }
+    const event = {
+        ...eventDocument,
+        title: String(eventDocument.title),
+        slug: String(eventDocument.slug),
+        description: String(eventDocument.description),
+        overview: String(eventDocument.overview),
+        image: String(eventDocument.image),
+        venue: String(eventDocument.venue),
+        location: String(eventDocument.location),
+        date: String(eventDocument.date),
+        time: String(eventDocument.time),
+        mode: String(eventDocument.mode),
+        audience: String(eventDocument.audience),
+        organizer: String(eventDocument.organizer),
+        agenda: eventDocument.agenda.map(String),
+        tags: eventDocument.tags.map(String),
+    } as IEvent;
 
-    const request = await fetch(`${BASE_URL}/api/events/${encodeURIComponent(slug)}`);
-
-    if (request.status === 404) return notFound();
-    if (!request.ok) {
-        throw new Error(`Failed to fetch event: ${request.status} ${request.statusText}`);
-    }
-
-    const { event } = await request.json() as EventApiResponse;
     if (!event) return notFound();
 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = event;
