@@ -20,8 +20,8 @@ const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => (
     <div className="agenda">
         <h2>Agenda</h2>
         <ul>
-            {agendaItems.map((item, index) => (
-                <li key={index}>{item}</li>
+            {agendaItems.map((item) => (
+                <li key={item}>{item}</li>
             ))}
         </ul>
     </div>
@@ -29,11 +29,23 @@ const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => (
 
 const EventTags = ({ tags }: { tags: string[] }) => (
     <div className="flex flex-row gap-1.5 flex-wrap">
-            {tags.map((tag, index) => (
+            {tags.map((tag) => (
                 <div className="pill" key={tag}>{tag}</div>
             ))}
     </div>
 );
+
+const normalizeStringArray = (values: string[]): string[] =>
+    values.flatMap((value) => {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed)
+                ? parsed.filter((item): item is string => typeof item === 'string')
+                : [value];
+        } catch {
+            return [value];
+        }
+    });
 
 interface EventApiResponse {
     event?: IEvent;
@@ -88,14 +100,14 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
                     <EventDetailItem icon="/icons/audience.svg" alt="audience" label={audience} />
                 </section>
 
-                <EventAgenda agendaItems={JSON.parse(agenda[0])} />
+                <EventAgenda agendaItems={normalizeStringArray(agenda)} />
 
                 <section className="flex-col-gap-2">
                     <h2>About the Organizer</h2>
                     <p>{organizer}</p>
                 </section>
 
-                <EventTags tags={JSON.parse(tags[0])} />
+                <EventTags tags={normalizeStringArray(tags)} />
 
             </div>
             {/* Right Side -Booking Form  */}

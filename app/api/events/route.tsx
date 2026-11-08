@@ -28,8 +28,38 @@ await connectToDatabase();
 
     }
 
-    const tags = typeof event.tags === 'string' ? JSON.parse(event.tags) : event.tags;
-    const agenda = typeof event.agenda === 'string' ? JSON.parse(event.agenda) : event.agenda;
+    const parseStringArray = (value: unknown, fieldName: string): string[] => {
+      const parseValue = (input: unknown): unknown[] => {
+        if (Array.isArray(input)) return input.flatMap(parseValue);
+        if (typeof input !== 'string') return [];
+
+        const trimmed = input.trim();
+        if (!trimmed) return [];
+
+        try {
+          return parseValue(JSON.parse(trimmed));
+        } catch {
+          return trimmed
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean);
+        }
+      };
+
+      const values = parseValue(value)
+        .filter((item): item is string => typeof item === 'string')
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      if (values.length === 0) {
+        throw new Error(`${fieldName} must contain at least one non-empty value.`);
+      }
+
+      return values;
+    };
+
+    const tags = parseStringArray(event.tags, 'Tags');
+    const agenda = parseStringArray(event.agenda, 'Agenda');
 
     if(!file) return NextResponse.json({ message: 'Image file is required' }, { status: 400 })
 
@@ -48,7 +78,7 @@ await connectToDatabase();
 
     event.image = (uploadResult as { secure_url: string }).secure_url;
 
-    const createdEvent = await Event.create({...event, tags:tags, agenda: [agenda]});
+    const createdEvent = await Event.create({ ...event, tags, agenda });
 
     return NextResponse.json(
         {
