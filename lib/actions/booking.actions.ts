@@ -4,7 +4,7 @@ import { Booking } from "@/database/booking.model";
 
 import { connectToDatabase } from "../mongodb";
 
-export const createBooking = async ({ eventId, slug, email }: { eventId: string; slug: string; email: string }) => {
+export const createBooking = async ({ eventId, email }: { eventId: string; email: string }) => {
     try{
         await connectToDatabase();
         const booking = await Booking.create({ eventId, email });
